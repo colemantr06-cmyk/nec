@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Solaire — 58ft Power Catamaran | BVI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+/* ═══ RESET & ROOT ═══ */
+:root{--gold:#1a9e96;--ocean:#fcfcfa;--navy:#f0f5f4;--cream:#2c3e3b;--muted:rgba(44,62,59,.55);--teal:#1a9e96;--turquoise:#22b8ae;--sea-light:#e8f5f3;--sea-mid:#80deea;--hero-dark:#07111f;--accent:#d4a853;--sand:#f7f3ec;--solaire-logo:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');--solaire-logo-full:url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:var(--ocean);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;overflow-x:hidden}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* ═══ PAGE ROUTER ═══ */
+.page{display:none;position:relative;z-index:10;min-height:100vh}
+.page.active{display:block}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:24px 64px;display:flex;align-items:center;justify-content:space-between;transition:all .4s ease;background:transparent;box-shadow:none}
+nav.scrolled{background:#ffffff;padding:16px 64px;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.logo{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:600;letter-spacing:.25em;color:var(--teal);text-decoration:none;text-transform:uppercase;cursor:pointer}
+.logo em{font-style:italic;color:var(--teal);font-weight:400;opacity:.85}
+.nav-links{display:flex;list-style:none}
+.nav-links li{position:relative}
+.nav-links a{font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:500;text-decoration:none;transition:color .3s;padding:8px 20px;display:block;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:#0d6b65}
+.dropdown{position:absolute;top:100%;left:0;background:rgba(255,255,255,.98);backdrop-filter:blur(24px);border:1px solid rgba(26,158,150,.12);min-width:190px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .25s,transform .25s;z-index:300}
+.nav-links li:hover .dropdown{opacity:1;pointer-events:all;transform:translateY(0)}
+.dropdown a{font-size:.78rem;letter-spacing:.14em;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,.04);color:var(--muted);display:block}
+.dropdown a:hover{color:var(--cream);background:rgba(201,164,74,.08)}
+.nav-book{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;border:none;color:var(--teal);background:transparent;position:relative;z-index:1;padding:0;display:inline-flex;align-items:center;justify-content:center;min-width:140px;min-height:140px;padding:10px 26px;text-decoration:none;transition:all .3s;cursor:pointer}
+.nav-book:hover{color:#0d6b65;transform:scale(1.05)}.nav-book:hover::before{background:rgba(26,158,150,.12)}
+
+/* ═══ SHARED ═══ */
+section{position:relative;z-index:10}
+.stag{font-size:.84rem;letter-spacing:.32em;text-transform:uppercase;color:var(--teal);font-weight:500;display:block;margin-bottom:18px}
+.sh{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,5vw,5rem);font-weight:300;line-height:1.05;color:#2c3e3b}
+.sh em{font-style:italic;color:var(--teal)}
+.rule{width:48px;height:2px;background:var(--teal);margin:32px 0;opacity:.5}
+.body-text{font-size:1.18rem;line-height:1.95;color:rgba(11,42,62,.58)}
+.btn-g{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:#fff;padding:0;font-size:.84rem;letter-spacing:.22em;text-transform:uppercase;font-weight:500;text-decoration:none;border:none;transition:all .35s;position:relative;z-index:1;min-width:180px;min-height:180px;margin-right:14px;cursor:pointer}
+.btn-g:hover{color:#fff;transform:scale(1.05)}.btn-g:hover::before{background:#158f88;filter:drop-shadow(0 6px 16px rgba(26,158,150,.35))}
+.btn-o{display:inline-block;border:2px solid var(--teal);color:var(--teal);padding:17px 52px;font-size:.84rem;letter-spacing:.22em;text-transform:uppercase;font-weight:400;text-decoration:none;transition:all .32s;border-radius:6px;cursor:pointer}
+.btn-o:hover{color:#fff;transform:scale(1.05)}.btn-o:hover::before{background:var(--teal);filter:drop-shadow(0 6px 16px rgba(26,158,150,.35))}
+
+/* ═══ FOOTER ═══ */
+footer{background:var(--sand);padding:70px 64px 44px;border-top:1px solid rgba(26,158,150,.12);position:relative;z-index:10}
+.ft-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.ft-name{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;text-transform:uppercase;letter-spacing:.06em;color:#f5edd8;margin-bottom:10px}
+.ft-tagline{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:1rem;margin-bottom:14px}
+.ft-desc{font-size:.96rem;color:rgba(245,237,216,.62);line-height:1.8}
+.ft-head{font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.ft-ul{list-style:none}.ft-ul li{margin-bottom:10px}
+.ft-ul a{font-size:.96rem;color:rgba(245,237,216,.62);text-decoration:none;transition:color .3s;cursor:pointer}
+.ft-ul a:hover{color:#f5edd8}
+.ft-bot{max-width:1400px;margin:0 auto;padding-top:26px;border-top:1px solid rgba(44,62,59,.08);display:flex;justify-content:space-between;align-items:center}
+.ft-copy{font-size:.8rem;color:rgba(245,237,216,.22)}
+.ft-curr{font-size:.66rem;letter-spacing:.14em;color:rgba(245,237,216,.22)}
+.ft-curr a{color:var(--teal);text-decoration:none;opacity:.6;transition:opacity .3s}
+.ft-curr a:hover{opacity:1}
+
+/* ══════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════ */
+#hero{height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.hero-img{position:absolute;inset:0;will-change:transform}
+.hero-img img{width:100%;height:115%;object-fit:cover;object-position:center 40%;filter:brightness(.88) saturate(1.32) contrast(1.06);display:block;will-change:transform}
+.hero-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,17,31,.18) 0%,rgba(7,17,31,.05) 30%,rgba(7,17,31,.12) 55%,rgba(7,17,31,.25) 78%,rgba(248,253,255,.85) 95%,rgba(248,253,255,1) 100%)}
+.hero-c{position:relative;z-index:5;text-align:center;padding:0 20px}
+.hero-eyebrow{font-size:.92rem;letter-spacing:.4em;text-transform:uppercase;color:#ffffff;font-weight:500;margin-bottom:30px;opacity:0;transform:translateY(18px);animation:fuUp .8s .5s ease forwards;text-shadow:0 1px 10px rgba(0,0,0,.25)}
+.title-row{overflow:hidden;line-height:.85}
+.hc{font-family:'Cormorant Garamond',serif;font-size:clamp(7rem,18vw,16rem);font-weight:300;letter-spacing:.06em;color:#ffffff;text-transform:uppercase;display:inline-block;opacity:0;transform:translateY(110px) rotateX(35deg);animation:charUp .9s ease forwards;transform-origin:bottom center;text-shadow:0 2px 24px rgba(7,17,31,.35),0 1px 4px rgba(7,17,31,.4)}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.35rem,2.6vw,2rem);color:rgba(255,255,255,.9);letter-spacing:.12em;margin-top:24px;opacity:0;animation:fuUp .8s 1.5s ease forwards;text-shadow:0 2px 24px rgba(0,0,0,.9)}
+.hero-stats{display:flex;gap:52px;justify-content:center;margin-top:38px;opacity:0;animation:fuUp .8s 1.8s ease forwards}
+.hs-num{font-family:'Cormorant Garamond',serif;font-size:2.6rem;color:#ffffff;display:block;line-height:1;text-shadow:0 1px 10px rgba(0,0,0,.25)}
+.hs-lab{font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,237,216,.65)}
+@keyframes fuUp{to{opacity:1;transform:translateY(0)}}
+@keyframes charUp{to{opacity:1;transform:translateY(0) rotateX(0deg)}}
+
+/* story */
+#story{padding:160px 64px;background:linear-gradient(180deg,#d8eae6 0%,#c5dcd6 100%)}
+.story-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.story-imgs{position:relative;height:560px}
+.si-main{position:absolute;top:0;left:0;width:72%;height:78%;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.12);filter:saturate(1.2) contrast(1.08);will-change:transform}
+.si-accent{position:absolute;bottom:0;right:0;width:58%;height:52%;object-fit:cover;box-shadow:0 20px 50px rgba(0,0,0,.1);border:3px solid #fff;filter:saturate(1.2) contrast(1.08);will-change:transform}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+.spec-row{border-top:1px solid rgba(26,158,150,.15);padding-top:12px}
+.spec-k{font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);margin-bottom:3px}
+.spec-v{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:#0b2a3e}
+
+/* experience grid */
+#experience{padding:120px 64px;overflow:hidden}
+.exp-header{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:60px;margin-bottom:70px}
+.exp-note{font-size:1.18rem;line-height:1.9;color:rgba(11,42,62,.55);max-width:480px}
+.exp-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.exp-cell{position:relative;overflow:hidden;cursor:pointer}
+.exp-cell:nth-child(-n+3){height:380px}
+.exp-cell:nth-child(n+4){height:280px}
+.exp-cell img{width:100%;height:100%;object-fit:cover;filter:brightness(1) saturate(1.35) contrast(1.1);transform:scale(1.05);transition:transform .8s cubic-bezier(.23,1,.32,1),filter .4s}
+.exp-cell:hover img{transform:scale(1);filter:brightness(.95) saturate(1.4) contrast(1.15)}
+.exp-cell-info{position:absolute;bottom:0;left:0;right:0;padding:28px 22px 20px;background:linear-gradient(to top,rgba(7,17,31,.85),transparent);transform:translateY(6px);transition:transform .4s}
+.exp-cell:hover .exp-cell-info{transform:translateY(0)}
+.exp-cell-name{font-family:'Cormorant Garamond',serif;font-size:1.45rem;color:#f5edd8}
+.exp-cell-sub{font-size:.85rem;color:rgba(245,237,216,.6);margin-top:4px;letter-spacing:.06em}
+
+/* ticker */
+.ticker-wrap{overflow:hidden;padding:28px 0;margin-top:70px;background:linear-gradient(135deg,#1a9e96,#22b8ae);color:#fff}
+.ticker-track{display:flex;animation:tick 65s linear infinite;width:max-content}
+.ti{display:flex;align-items:center;gap:40px;padding:0 40px;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:rgba(255,255,255,.9);font-weight:400;letter-spacing:.04em;letter-spacing:.05em}
+.ti span{color:rgba(255,255,255,.4);font-size:.8rem}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* crew */
+#crew-teaser{padding:120px 64px;overflow:hidden;background:var(--sand);position:relative}
+.ct-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.ct-half{position:relative;height:68vh;min-height:500px;overflow:hidden}
+.ct-half img{width:100%;height:100%;object-fit:cover;object-position:center 20%;filter:brightness(.8) saturate(1.2) contrast(1.08);display:block;transition:filter .5s}
+.ct-half:hover img{filter:brightness(.62)}
+.ct-over{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:52px 48px;background:linear-gradient(to top,rgba(7,17,31,.92),rgba(7,17,31,.08) 55%,transparent)}
+.ct-role{font-size:.78rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:10px}
+.ct-name{font-family:'Cormorant Garamond',serif;font-size:2.8rem;color:#fff;line-height:1;margin-bottom:4px}
+.ct-nat{font-size:.88rem;color:rgba(245,237,216,.62);letter-spacing:.1em;margin-bottom:18px}
+.ct-bio{font-size:1.05rem;line-height:1.85;color:rgba(245,237,216,.65);max-width:400px}
+.ct-cred{display:inline-block;margin-top:16px;border:1px solid rgba(255,255,255,.3);padding:7px 16px;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+
+/* destinations */
+#destinations{padding:120px 64px;overflow:hidden}
+.dest-inner{max-width:1400px;margin:0 auto}
+.dest-header{text-align:center;margin-bottom:70px}
+.dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.dest-card{position:relative;height:360px;overflow:hidden;cursor:pointer}
+.dest-card img{width:100%;height:100%;object-fit:cover;filter:brightness(.85) saturate(1.3) contrast(1.1);transition:filter .5s,transform .8s cubic-bezier(.23,1,.32,1);display:block}
+.dest-card:hover img{filter:brightness(.78) saturate(1.4) contrast(1.15);transform:scale(1.06)}
+.dest-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:36px 32px}
+.dest-name{font-family:'Cormorant Garamond',serif;font-size:2.3rem;color:#f5edd8;text-shadow:0 4px 20px rgba(0,0,0,.6);line-height:1.2}
+.dest-sub{margin-top:10px;font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.8);opacity:0;transform:translateY(10px);transition:opacity .35s,transform .35s}
+.dest-card:hover .dest-sub{opacity:1;transform:none}
+
+/* review */
+#review{padding:110px 64px;text-align:center;background:var(--sand)}
+.rev-inner{max-width:820px;margin:0 auto}
+.big-q{font-family:'Cormorant Garamond',serif;font-size:7rem;line-height:.4;color:rgba(26,158,150,.2);display:block;margin-bottom:36px}
+.rev-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:300;line-height:1.65;color:#0b2a3e;margin-bottom:32px}
+.stars{color:var(--accent);font-size:.95rem;letter-spacing:6px;display:block;margin-bottom:12px}
+.rev-attr{font-size:.82rem;letter-spacing:.28em;text-transform:uppercase;color:var(--teal)}
+
+/* cta */
+#cta{height:88vh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cta-img{position:absolute;inset:0}
+.cta-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.7) saturate(1.4) contrast(1.05);display:block}
+.cta-grad{position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,158,150,.6),rgba(7,17,31,.25))}
+.cta-c{position:relative;z-index:5;text-align:center;padding:0 40px}
+.cta-tag{font-size:.82rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:22px;display:block}
+.cta-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,8vw,7rem);font-weight:300;text-transform:uppercase;line-height:.9;color:#f5edd8;margin-bottom:28px;text-shadow:0 6px 40px rgba(0,0,0,.7)}
+.cta-sub{font-size:1.18rem;color:rgba(245,237,216,.7);max-width:480px;margin:0 auto 44px;line-height:1.8}
+
+/* ══════════════════════════════════════
+   CABINS PAGE
+══════════════════════════════════════ */
+.page-hero{height:65vh;position:relative;display:flex;align-items:flex-end;overflow:hidden;padding:80px 64px}
+.page-hero img{position:absolute;inset:0;width:100%;height:120%;object-fit:cover;filter:brightness(.5) saturate(1.3) contrast(1.1)}
+.page-hero-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(248,253,255,1) 0%,rgba(7,17,31,.3) 58%,rgba(7,17,31,.05) 100%)}
+.page-hero-c{position:relative;z-index:5;max-width:1400px;margin:0 auto;width:100%}
+.page-eyebrow{font-size:.82rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,8vw,7rem);font-weight:300;line-height:.9;color:#f5edd8;text-transform:uppercase}
+.cabin-section{padding:100px 64px;max-width:1400px;margin:0 auto}
+.cabin-section+.cabin-section{border-top:1px solid rgba(26,158,150,.1)}
+.cabin-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.cabin-grid.rev{direction:rtl}.cabin-grid.rev>*{direction:ltr}
+.cabin-imgs .main-img{width:100%;height:480px;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.15);filter:saturate(1.15) contrast(1.05);display:block}
+.cabin-imgs .thumb-row{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:3px}
+.cabin-imgs .thumb-row img{width:100%;height:200px;object-fit:cover;filter:brightness(.95) saturate(1.15) contrast(1.05);transition:filter .3s;display:block}
+.cabin-imgs .thumb-row img:hover{filter:brightness(1)}
+.cabin-tag{display:inline-block;background:rgba(26,158,150,.06);border:1px solid rgba(26,158,150,.2);color:var(--teal);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;padding:5px 14px;margin-bottom:18px}
+.cabin-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,3.5vw,3.6rem);font-weight:300;color:#0b2a3e;line-height:1;margin-bottom:10px}
+.cabin-sub{font-size:.88rem;color:var(--teal);letter-spacing:.2em;text-transform:uppercase;margin-bottom:26px}
+.amenities{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.am{display:flex;align-items:center;gap:10px;font-size:1.02rem;color:rgba(11,42,62,.55)}
+.am::before{content:'';width:5px;height:5px;background:var(--teal);border-radius:50%;flex-shrink:0}
+.layout-block{padding:80px 64px;text-align:center}
+.layout-img{max-width:900px;margin:40px auto 0;display:block;opacity:.85;width:100%}
+
+/* ══════════════════════════════════════
+   CUISINE PAGE
+══════════════════════════════════════ */
+.chef-intro{padding:100px 64px;max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.chef-intro img{width:100%;height:500px;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,.12);filter:saturate(1.2) contrast(1.08)}
+.menu-sec{padding:80px 64px;max-width:1400px;margin:0 auto}
+.menu-sec+.menu-sec{border-top:1px solid rgba(26,158,150,.1)}
+.menu-header{display:grid;grid-template-columns:1fr 2fr;gap:60px;align-items:start;margin-bottom:50px}
+.menu-header-img{width:100%;height:320px;object-fit:cover}
+.menu-items{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.mi{padding:22px 0;border-bottom:1px solid rgba(26,158,150,.1)}
+.mi:nth-child(odd){padding-right:36px;border-right:1px solid rgba(26,158,150,.1)}
+.mi:nth-child(even){padding-left:36px}
+.mi-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#0b2a3e;margin-bottom:5px}
+.mi-desc{font-size:.96rem;color:rgba(11,42,62,.5);line-height:1.7;letter-spacing:.02em}
+.submenu-label{font-family:'Cormorant Garamond',serif;font-size:1.15rem;letter-spacing:.3em;text-transform:uppercase;color:var(--teal);opacity:.8;margin-bottom:24px;display:block}
+.food-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:50px}
+.food-strip img{width:100%;height:240px;object-fit:cover;filter:brightness(.95) saturate(1.25) contrast(1.08);transition:filter .4s}
+.food-strip img:hover{filter:brightness(1)}
+.cocktail-hero{position:relative;height:380px;overflow:hidden;margin-bottom:56px}
+.cocktail-hero img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(1.2) contrast(1.08)}
+.cocktail-hero-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.cocktail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.ci{padding:26px 0;border-bottom:1px solid rgba(26,158,150,.1)}
+.ci:nth-child(odd){padding-right:36px;border-right:1px solid rgba(26,158,150,.1)}
+.ci:nth-child(even){padding-left:36px}
+.ci-name{font-family:'Cormorant Garamond',serif;font-size:1.48rem;color:#0b2a3e;margin-bottom:5px}
+.ci-desc{font-size:.96rem;color:rgba(11,42,62,.5);line-height:1.7}
+.cocktail-note{padding:26px 36px;background:rgba(26,158,150,.04);border:1px solid rgba(26,158,150,.12);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+
+
+
+
+
+/* ═══ SUN BUTTON SHAPES ═══ */
+.btn-g,.nav-book,.bf-submit{
+  text-align:center;max-width:170px;line-height:1.5;word-spacing:100vw;
+}
+.nav-book{max-width:140px;line-height:1.4}
+.bf-submit{max-width:155px}
+.btn-g::before,.nav-book::before,.bf-submit::before{content:'';position:absolute;top:50%;left:50%;width:130px;height:130px;transform:translate(-50%,-50%);z-index:-1;transition:all .35s ease;border:1.5px solid rgba(26,158,150,.5);border-radius:50%;background:transparent}
+.btn-g:hover::before,.nav-book:hover::before,.bf-submit:hover::before{
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2232%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M102.5%2C68.0%20C106.0%2C58.1%2095.8%2C48.2%20100.5%2C38.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M97.5%2C68.0%20C95.2%2C58.1%20103.5%2C48.2%2099.6%2C38.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100.0%2C68.0%20C101.8%2C56.0%2098.6%2C47.0%20100.0%2C42.5%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M116.1%2C72.3%20C125.8%2C63.7%20119.3%2C47.4%20130.0%2C39.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M111.6%2C70.1%20C113.6%2C57.9%20128.2%2C51.7%20129.2%2C38.6%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M126.6%2C82.0%20C141.5%2C78.4%20144.8%2C60.4%20158.2%2C54.3%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M123.5%2C78.1%20C131.4%2C65.8%20148.2%2C64.7%20157.6%2C53.6%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M125.0%2C80.0%20C139.8%2C71.7%20147.4%2C60.9%20152.9%2C57.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M131.8%2C95.3%20C143.2%2C100.9%20149.6%2C84.4%20160.6%2C86.7%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M130.6%2C90.4%20C139.0%2C82.5%20151.3%2C91.9%20160.4%2C85.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M130.6%2C109.6%20C141.4%2C115.6%20155.6%2C107.1%20166.2%2C115.6%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M131.8%2C104.7%20C143.8%2C105.1%20153.4%2C116.8%20166.4%2C114.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M131.2%2C107.1%20C144.8%2C112.1%20156.2%2C111.0%20161.0%2C113.9%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M123.5%2C121.9%20C131.2%2C134.5%20148.6%2C134.9%20157.5%2C146.5%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M126.6%2C118.0%20C139.6%2C123.9%20145.1%2C139.2%20158.1%2C145.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M111.6%2C129.9%20C110.1%2C141.7%20126.3%2C144.8%20126.5%2C156.1%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M116.1%2C127.7%20C124.7%2C134.6%20119.3%2C148.2%20127.2%2C155.7%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M113.9%2C128.8%20C116.7%2C140.8%20124.3%2C147.1%20124.9%2C151.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M97.5%2C132.0%20C89.5%2C143.9%20105.4%2C155.8%2099.5%2C168.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M102.5%2C132.0%20C108.4%2C143.9%2095.5%2C155.8%20100.4%2C168.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M83.9%2C127.7%20C74.7%2C138.7%2076.8%2C155.1%2067.4%2C166.5%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M88.4%2C129.9%20C84.4%2C143.4%2071.8%2C152.7%2068.2%2C166.8%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M86.1%2C128.8%20C77.2%2C143.2%2074.3%2C155.8%2070.6%2C161.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M73.4%2C118.0%20C62.6%2C120.3%2062.1%2C135.6%2051.2%2C138.3%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M76.5%2C121.9%20C71.0%2C130.8%2057.3%2C129.6%2051.8%2C138.9%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M68.2%2C104.7%20C55.2%2C101.0%2046.8%2C117.7%2033.6%2C114.6%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M69.4%2C109.6%20C58.8%2C116.8%2044.6%2C108.0%2033.8%2C115.5%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M68.8%2C107.1%20C54.2%2C107.7%2044.6%2C114.5%2039.0%2C113.9%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M69.4%2C90.4%20C57.6%2C79.6%2041.1%2C89.6%2028.0%2C83.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M68.2%2C95.3%20C53.4%2C98.0%2042.3%2C84.3%2027.8%2C83.9%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M76.5%2C78.1%20C71.0%2C69.2%2056.9%2C71.0%2051.8%2C61.0%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M73.4%2C82.0%20C64.2%2C77.6%2061.7%2C65.0%2051.3%2C61.6%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M75.0%2C80.0%20C66.7%2C71.2%2057.7%2C68.0%2055.0%2C64.1%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.1%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M88.4%2C70.1%20C87.7%2C57.2%2070.9%2C52.1%2070.9%2C38.5%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.7600000000000002%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M83.9%2C72.3%20C75.6%2C63.1%2079.9%2C47.8%2070.2%2C38.9%22%20fill%3D%22none%22%20stroke%3D%22%23158f88%22%20stroke-width%3D%221.54%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+  filter:drop-shadow(0 4px 14px rgba(26,158,150,.3));
+  transform:translate(-50%,-50%) scale(1.08) rotate(12deg);
+}
+.nav-book::before{width:150px;height:150px}
+.bf-submit::before{width:170px;height:170px}
+
+/* ═══ REVIEW CAROUSEL ═══ */
+.rev-slide{display:none;animation:revFade .6s ease}
+.rev-slide.active{display:block}
+@keyframes revFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rev-dots{display:flex;gap:10px;justify-content:center;margin-top:28px}
+.rev-dot{width:10px;height:10px;border-radius:50%;background:rgba(26,158,150,.2);cursor:pointer;transition:all .3s}
+.rev-dot.active{background:var(--teal);transform:scale(1.2)}
+.rev-dot:hover{background:var(--teal);opacity:.7}
+/* ═══ FOOTER OVERRIDES ═══ */
+footer .ft-name{color:#2c3e3b!important}
+footer .ft-tagline{color:var(--teal)!important}
+footer .ft-desc{color:rgba(44,62,59,.5)!important}
+footer .ft-head{color:var(--teal)!important}
+footer .ft-ul a{color:rgba(44,62,59,.5)!important}
+footer .ft-ul a:hover{color:#2c3e3b!important}
+footer .ft-copy{color:rgba(44,62,59,.25)!important}
+footer .ft-curr{color:rgba(44,62,59,.25)!important}
+
+/* ═══ BOOKING FORM MODAL ═══ */
+.booking-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(11,42,62,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.booking-modal.open{display:flex}
+.booking-form{background:#fff;max-width:560px;width:92%;padding:48px 44px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.booking-form h2{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:#0b2a3e;margin-bottom:6px}
+.booking-form .bf-sub{font-size:.86rem;color:rgba(11,42,62,.5);margin-bottom:32px;letter-spacing:.04em}
+.booking-form label{display:block;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;margin-top:18px}
+.booking-form input,.booking-form select,.booking-form textarea{width:100%;padding:14px 16px;border:1px solid rgba(11,42,62,.15);font-family:'Jost',sans-serif;font-size:1.05rem;color:#0b2a3e;background:#fafcfd;transition:border-color .3s;outline:none}
+.booking-form input:focus,.booking-form select:focus,.booking-form textarea:focus{border-color:var(--gold)}
+.booking-form input::placeholder,.booking-form textarea::placeholder{color:rgba(11,42,62,.3)}
+.booking-form textarea{resize:vertical;min-height:70px}
+.bf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bf-close{position:absolute;top:18px;right:22px;background:none;border:none;font-size:1.6rem;cursor:pointer;color:rgba(11,42,62,.4);transition:color .3s}
+.bf-close:hover{color:#0b2a3e}
+.bf-submit{display:inline-flex;align-items:center;justify-content:center;width:auto;margin:28px auto 0;padding:0;background:transparent;color:#fff;border:none;position:relative;z-index:1;min-width:160px;min-height:160px;font-family:'Jost',sans-serif;font-size:.86rem;letter-spacing:.22em;text-transform:uppercase;font-weight:500;cursor:pointer;transition:all .3s}
+.bf-submit:hover{color:#fff;transform:scale(1.05)}.bf-submit:hover::before{background:#158f88;filter:drop-shadow(0 4px 12px rgba(26,158,150,.3))}
+.bf-success{display:none;text-align:center;padding:60px 20px}
+.bf-success h3{font-family:'Cormorant Garamond',serif;font-size:2rem;color:#0b2a3e;margin-bottom:12px}
+.bf-success p{color:rgba(11,42,62,.6);line-height:1.7}
+
+/* Sun logo styling */
+.sun-logo{display:inline-block;width:100%;height:100%;background-image:var(--solaire-logo);background-size:contain;background-position:center;background-repeat:no-repeat}
+/* Hero brand mark above SOLAIRE letters (centered) */
+@media(max-width:768px){}
+/* Page-hero brand mark (cabins, cuisine — above page title, top right of content) */
+.page-brand-mark{position:absolute;top:120px;right:64px;width:120px;height:120px;opacity:.95;z-index:6;filter:drop-shadow(0 4px 16px rgba(0,0,0,.5)) brightness(1.08);transition:transform .5s}
+.page-brand-mark:hover{transform:scale(1.04)}
+@media(max-width:768px){.page-brand-mark{width:48px;height:48px;top:110px;right:24px}}
+/* CTA brand mark (above "Set Sail on Solaire") */
+@media(max-width:768px){}
+/* Nav inline logo (left of SOLAIRE wordmark) */
+.nav-logo-mark{display:inline-block;width:52px;height:52px;vertical-align:middle;margin-right:10px;transition:transform .4s;position:relative;top:-2px}
+.logo:hover .nav-logo-mark{transform:scale(1.04)}
+@media(max-width:768px){.nav-logo-mark{width:36px;height:36px;margin-right:6px}}
+/* Footer logo */
+.ft-logo-mark{display:inline-block;width:42px;height:42px;vertical-align:middle;margin-right:12px}
+
+
+/* Darker bg + bolder text in story section so words pop */
+#story .body-text{color:rgba(11,42,62,.82);font-weight:400}
+#story .sh{color:#0f2937}
+#story .stag{color:#0d6661}
+#story .spec-k{color:#0d6661}
+#story .spec-v{color:#0f2937;font-weight:400}
+
+
+/* Hero brand mark uses the FULL Solaire logo (sun + wordmark) */
+/* CTA brand mark also uses full logo */
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <span class="logo" onclick="goPage('home')"><span class="nav-logo-mark"><span class="sun-logo"></span></span>SOL<em>AIRE</em></span>
+  <ul class="nav-links">
+    <li><a id="nav-home" class="active" onclick="goPage('home')">Home</a></li>
+    <li>
+      <a id="nav-cabins" onclick="goPage('cabins')">Cabins</a>
+      <div class="dropdown">
+        <a onclick="goPage('cabins','master')">Master Suite</a>
+        <a onclick="goPage('cabins','starboard')">Starboard Cabin</a>
+        <a onclick="goPage('cabins','port')">Port Cabin</a>
+        <a onclick="goPage('cabins','salon')">Salon &amp; Galley</a>
+      </div>
+    </li>
+    <li>
+      <a id="nav-cuisine" onclick="goPage('cuisine')">Cuisine</a>
+      <div class="dropdown">
+        <a onclick="goPage('cuisine','breakfast')">Breakfast</a>
+        <a onclick="goPage('cuisine','lunch')">Lunch</a>
+        <a onclick="goPage('cuisine','dinner')">Dinner</a>
+        <a onclick="goPage('cuisine','cocktails')">Cocktails</a>
+      </div>
+    </li>
+    <li><a onclick="goPage('home','crew-teaser')">Crew</a></li>
+    <li><a onclick="goPage('home','destinations')">Destinations</a></li>
+  </ul>
+  <a class="nav-book" onclick="openBookingForm()">Start Your Journey</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     HOME PAGE
+═══════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+<section id="hero" style="position:relative">
+  <div class="hero-img" id="heroImg">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Solaire">
+  </div>
+  <div class="hero-grad"></div>
+  <div class="hero-c">
+    <p class="hero-eyebrow">58ft · Power Catamaran · Built 2026 · British Virgin Islands</p>
+    <div class="title-row">
+      <span class="hc" style="animation-delay:.75s">S</span><span class="hc" style="animation-delay:.88s">O</span><span class="hc" style="animation-delay:1.01s">L</span><span class="hc" style="animation-delay:1.14s">A</span><span class="hc" style="animation-delay:1.27s">I</span><span class="hc" style="animation-delay:1.4s">R</span><span class="hc" style="animation-delay:1.53s">E</span>
+    </div>
+    <p class="hero-sub">Find Your Sun — With Solaire!</p>
+    <div class="hero-stats">
+      <div><span class="hs-num">58ft</span><span class="hs-lab">Length</span></div>
+      <div><span class="hs-num">6</span><span class="hs-lab">Guests</span></div>
+      <div><span class="hs-num">27kn</span><span class="hs-lab">Top Speed</span></div>
+      <div><span class="hs-num">$42–45k</span><span class="hs-lab">Per Week</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="story">
+  <div class="story-grid">
+    <div class="story-imgs">
+      <img class="si-main" id="siMain" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Solaire overhead">
+      <img class="si-accent" id="siAccent" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Solaire side">
+    </div>
+    <div id="storyText">
+      <span class="stag">The Yacht</span>
+      <h2 class="sh">A Floating<br><em>Playground</em><br>of the Sun</h2>
+      <div class="rule"></div>
+      <p class="body-text">Solaire means "of the sun." Designed to celebrate sunshine and space, this 58-foot Two Oceans power catamaran delivers an exceptional on-water experience centered around expansive outdoor living and seamless comfort.</p>
+      <p class="body-text" style="margin-top:16px">At anchor, Solaire becomes a true floating playground — crystal-clear waters, vibrant reefs, a FunAir inflatable slide, Bote 360 floating bar, and endless open sky.</p>
+      <div class="spec-grid">
+        <div class="spec-row"><div class="spec-k">Builder</div><div class="spec-v">Two Oceans</div></div>
+        <div class="spec-row"><div class="spec-k">Built</div><div class="spec-v">2026</div></div>
+        <div class="spec-row"><div class="spec-k">Beam</div><div class="spec-v">30 Feet</div></div>
+        <div class="spec-row"><div class="spec-k">Internet</div><div class="spec-v">Starlink</div></div>
+        <div class="spec-row"><div class="spec-k">Engines</div><div class="spec-v">2×550 Cummins</div></div>
+        <div class="spec-row"><div class="spec-k">Range</div><div class="spec-v">700 nm</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="exp-header">
+    <div><span class="stag">Onboard Life</span><h2 class="sh">Every Day a<br><em>New Adventure</em></h2></div>
+    <p class="exp-note">From the FunAir slide to drifting on the Bote 360 above the reef — Solaire is equipped with everything to make every hour unforgettable.</p>
+  </div>
+  <div class="exp-grid">
+    <div class="exp-cell" id="ec0"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Slide"><div class="exp-cell-info"><div class="exp-cell-name">FunAir Slide</div><div class="exp-cell-sub">Drop in from the flybridge</div></div></div>
+    <div class="exp-cell" id="ec1"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Aerial"><div class="exp-cell-info"><div class="exp-cell-name">Solar Powered</div><div class="exp-cell-sub">Silence at anchor</div></div></div>
+    <div class="exp-cell" id="ec2"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Anchor"><div class="exp-cell-info"><div class="exp-cell-name">Private Anchorages</div><div class="exp-cell-sub">Your own island every night</div></div></div>
+    </div>
+  <div class="ticker-wrap"><div class="ticker-track">
+    <div class="ti">FunAir Inflatable Slide<span>✦</span></div><div class="ti">Sea Scooters<span>✦</span></div><div class="ti">Wakeboard<span>✦</span></div><div class="ti">2-Man Kayaks<span>✦</span></div><div class="ti">Stand-Up Paddle<span>✦</span></div><div class="ti">Floating Mats<span>✦</span></div><div class="ti">Ooni Pizza Oven<span>✦</span></div><div class="ti">Homemade Ice Cream<span>✦</span></div><div class="ti">Starlink WiFi<span>✦</span></div><div class="ti">Bote 360 Bar<span>✦</span></div><div class="ti">Fishing Gear<span>✦</span></div><div class="ti">Espresso Machine<span>✦</span></div><div class="ti">Wine Cooler<span>✦</span></div><div class="ti">Underwater Camera<span>✦</span></div>
+    <div class="ti">FunAir Inflatable Slide<span>✦</span></div><div class="ti">Sea Scooters<span>✦</span></div><div class="ti">Wakeboard<span>✦</span></div><div class="ti">2-Man Kayaks<span>✦</span></div><div class="ti">Stand-Up Paddle<span>✦</span></div><div class="ti">Floating Mats<span>✦</span></div><div class="ti">Ooni Pizza Oven<span>✦</span></div><div class="ti">Homemade Ice Cream<span>✦</span></div><div class="ti">Starlink WiFi<span>✦</span></div><div class="ti">Bote 360 Bar<span>✦</span></div><div class="ti">Fishing Gear<span>✦</span></div><div class="ti">Espresso Machine<span>✦</span></div><div class="ti">Wine Cooler<span>✦</span></div><div class="ti">Underwater Camera<span>✦</span></div>
+  </div></div>
+</section>
+
+<section id="crew-teaser">
+  <div style="max-width:1400px;margin:0 auto 70px;text-align:center">
+    <span class="stag">Your Team</span><h2 class="sh">Solaire <em>Crew</em></h2>
+  </div>
+  <div class="ct-inner">
+    <div class="ct-half" id="ctLeft">
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Captain Sam">
+      <div class="ct-over" id="ctOvL">
+        <div class="ct-role">Captain</div><div class="ct-name">Sam Crone</div>
+        <div class="ct-nat">New Zealand · RYA Yachtmaster</div>
+        <div class="ct-bio">Sam grew up in New Zealand, spending his childhood sailing and diving, which fostered a lifelong connection to the ocean. He served as a Naval Officer in the Royal New Zealand Navy for 10 years, specializing in navigation. A PADI Divemaster who has explored waters throughout Indonesia, the Caribbean, and the Pacific — and a certified sailing instructor — he loves sharing the beauty of the ocean both above and below the surface. Now in his fourth year as a charter captain, Sam is dedicated to creating lifelong memories on the water.</div>
+        <span class="ct-cred">RYA Yachtmaster Offshore · PADI Divemaster · STCW</span>
+      </div>
+    </div>
+    <div class="ct-half" id="ctRight">
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Chef Matilda">
+      <div class="ct-over" id="ctOvR">
+        <div class="ct-role">Chef / Stew</div><div class="ct-name">Matilda Kopra</div>
+        <div class="ct-nat">Finnish · Quarterdeck Trained</div>
+        <div class="ct-bio">A private chef with ten years of experience in the food and hospitality industry. Matilda's career has taken her across Europe — from private chalets in the French and Swiss Alps to yachts along the Mediterranean. Her culinary approach is rooted in wholesome, health-forward cuisine that's vibrant, balanced, and deeply satisfying. Mediterranean flavors are especially close to her heart, and she always tailors every meal with care and attention to the tastes and needs of each guest.</div>
+        <span class="ct-cred">Quarterdeck Academy · STCW · Level 2 Food Safety</span>
+      </div>
+    </div>
+
+
+</section>
+
+<section id="destinations">
+  <div class="dest-inner">
+    <div class="dest-header">
+      <span class="stag">Cruising Area</span><h2 class="sh">Where Will <em>You Sail?</em></h2>
+      <p style="color:rgba(11,42,62,.55);max-width:500px;margin:18px auto 0;line-height:1.85;font-size:1.05rem">Home-ported in Tortola, BVI — Solaire roams the most spectacular sailing waters on earth.</p>
+    </div>
+    <div class="dest-grid">
+      <div class="dest-card" id="dc0"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="BVI"><div class="dest-over"><div class="dest-name">US &amp; British<br>Virgin Islands</div><div class="dest-sub">Home Port: Tortola, BVI</div></div></div>
+      <div class="dest-card" id="dc1"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Leewards"><div class="dest-over"><div class="dest-name">Caribbean<br>Leewards</div><div class="dest-sub">St. Martin &amp; Beyond</div></div></div>
+      <div class="dest-card" id="dc2"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Bahamas"><div class="dest-over"><div class="dest-name">The<br>Bahamas</div><div class="dest-sub">Winter Operations</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="review">
+  <div class="rev-inner" id="reviewContainer">
+    <span class="big-q">"</span>
+    <div class="rev-slide active" id="rev0">
+      <p class="rev-text">Thank you to the captain and chef for everything you did to make this a wonderful and fun week on this beautiful yacht! Your attention to detail and excellent fun made for amazing adventures for the boys and great memories for us all. The accommodations were perfect, and the meals were second to none! You made a great team! Thank you so much! Perfect chef and captain!</p>
+      <span class="stars">★ ★ ★ ★ ★</span>
+      <span class="rev-attr">Charter Guests · January 2026</span>
+    </div>
+    <div class="rev-slide" id="rev1">
+      <p class="rev-text">The captain made us all feel so welcomed and relaxed. Amazing food from the chef, perfect swim and water toy days — we are leaving reluctantly after a splendid time aboard Solaire.</p>
+      <span class="stars">★ ★ ★ ★ ★</span>
+      <span class="rev-attr">Charter Guests · First Charter Ever</span>
+    </div>
+    <div class="rev-dots">
+      <span class="rev-dot active" onclick="showReview(0)"></span>
+      <span class="rev-dot" onclick="showReview(1)"></span>
+    </div>
+  </div>
+</section>
+
+<section id="cta">
+  <div class="cta-img" id="ctaImg"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt=""></div>
+  <div class="cta-grad"></div>
+  <div class="cta-c" id="ctaContent">
+    <span class="cta-tag" style="color:rgba(255,255,255,.8)">Find Your Sun — With Solaire!</span>
+    <h2 class="cta-title">Set Sail on<br>Solaire</h2>
+    <p class="cta-sub">Begin with an inquiry — our team will craft your perfect BVI itinerary.</p>
+    <a class="btn-g" onclick="openBookingForm()">Start Your Journey</a>
+    
+  </div>
+</section>
+
+<footer style="position:relative;z-index:10"><div class="ft-grid"><div><div class="ft-name"><span class="ft-logo-mark"><span class="sun-logo"></span></span>Solaire</div><div class="ft-tagline">Find Your Sun — With Solaire!</div><p class="ft-desc">A 58-foot crewed power catamaran, built 2026. All-inclusive charter in the British Virgin Islands. 6 guests · 4 cabins · 2 exceptional crew.</p></div><div><div class="ft-head">Pages</div><ul class="ft-ul"><li><a onclick="goPage('home')">Home</a></li><li><a onclick="goPage('cabins')">Cabins</a></li><li><a onclick="goPage('cuisine')">Cuisine</a></li></ul></div><div><div class="ft-head">Onboard</div><ul class="ft-ul"><li><a onclick="goPage('home','crew-teaser')">Crew</a></li><li><a onclick="goPage('home','experience')">Experience</a></li><li><a onclick="goPage('home','destinations')">Destinations</a></li></ul></div><div><div class="ft-head">Booking</div><ul class="ft-ul"><li><a onclick="openBookingForm()" style="cursor:pointer">Inquire Now</a></li><li><a>$42–45k / week</a></li><li><a>5-Night Minimum</a></li><li><a>All Inclusive</a></li></ul></div></div><div class="ft-bot"><span class="ft-copy">© 2026 Solaire Charter. All rights reserved.</span><span class="ft-curr">Marketing by <a href="#" target="_blank">Currnt</a></span></div></footer>
+
+</div><!-- /page-home -->
+
+<!-- ═══════════════════════════════════════════════
+     CABINS PAGE
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-cabins">
+
+<div class="page-hero">
+  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Cabins">
+  <div class="page-hero-grad"></div>
+  
+  <div class="page-hero-c">
+    <span class="page-eyebrow">Accommodations</span>
+    <h1 class="page-title">Cabins &amp;<br>Spaces</h1>
+  </div>
+</div>
+
+<div id="master" class="cabin-section">
+  <div class="cabin-grid">
+    <div class="cabin-imgs">
+      <img class="main-img" src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure11.jpg?ssl=1" alt="Master Suite" onerror="this.style.opacity='.15'">
+      <div class="thumb-row">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Galley" onerror="this.style.opacity='.15'">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Salon" onerror="this.style.opacity='.15'">
+      </div>
+    </div>
+    <div>
+      <span class="cabin-tag">Master Suite</span>
+      <div class="cabin-title">King Bed<br>Starboard Hull</div>
+      <div class="cabin-sub">Private En-Suite · Full AC</div>
+      <div class="rule"></div>
+      <p class="body-text">The master suite occupies the full starboard hull with a king-sized bed set athwartships, large hull windows, vanity, and a private en-suite with twin basins and separate shower. Designed for total privacy and comfort after full days on the water.</p>
+      <div class="amenities">
+        <div class="am">King-size bed</div><div class="am">Private en-suite</div>
+        <div class="am">Washer / Dryer</div><div class="am">Full air conditioning</div>
+        <div class="am">Hull windows</div><div class="am">USB charging ports</div>
+        <div class="am">LED mood lighting</div><div class="am">Premium linens</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="starboard" class="cabin-section">
+  <div class="cabin-grid rev">
+    <div class="cabin-imgs">
+      <img class="main-img" src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure12.jpg?ssl=1" alt="Guest Cabin" onerror="this.style.opacity='.15'">
+      </div>
+    <div>
+      <span class="cabin-tag">Guest Cabin</span>
+      <div class="cabin-title">Queen Bed<br>Port Forward</div>
+      <div class="cabin-sub">Private En-Suite · Full AC</div>
+      <div class="rule"></div>
+      <p class="body-text">A bright, airy guest cabin in the port forward hull with a queen-sized bed and its own private en-suite. Equally comfortable for couples or solo guests seeking their own quiet retreat after a day of adventure.</p>
+      <div class="amenities">
+        <div class="am">Queen-size bed</div><div class="am">Private en-suite</div>
+        <div class="am">Full air conditioning</div><div class="am">Hull windows</div>
+        <div class="am">USB charging</div><div class="am">Ample storage</div>
+        <div class="am">LED lighting</div><div class="am">Premium linens</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="port" class="cabin-section">
+  <div class="cabin-grid">
+    <div class="cabin-imgs">
+      <img class="main-img" src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure13.jpg?ssl=1" alt="Port Cabin" onerror="this.style.opacity='.15'">
+      </div>
+    <div>
+      <span class="cabin-tag">Guest Cabin</span>
+      <div class="cabin-title">Queen Bed<br>Port Aft</div>
+      <div class="cabin-sub">Private En-Suite · Full AC</div>
+      <div class="rule"></div>
+      <p class="body-text">The aft port cabin mirrors the comfort of its forward sibling — queen bed, private bathroom, and hull-side views that put the Caribbean right at your window. Perfect for the second couple or friends travelling together.</p>
+      <div class="amenities">
+        <div class="am">Queen-size bed</div><div class="am">Private en-suite</div>
+        <div class="am">Full air conditioning</div>
+        <div class="am">USB charging</div><div class="am">Ample storage</div>
+        <div class="am">LED lighting</div><div class="am">Premium linens</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="salon" class="cabin-section">
+  <div class="cabin-grid rev">
+    <div class="cabin-imgs">
+      <img class="main-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Salon" onerror="this.style.opacity='.15'">
+      <div class="thumb-row">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Galley" onerror="this.style.opacity='.15'">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Outdoor lounge" onerror="this.style.opacity='.15'">
+      </div>
+    </div>
+    <div>
+      <span class="cabin-tag">Salon &amp; Galley</span>
+      <div class="cabin-title">The Heart<br>of Solaire</div>
+      <div class="cabin-sub">Single-Level Living · Ocean Views</div>
+      <div class="rule"></div>
+      <p class="body-text">The expansive single-level salon opens fully to the aft deck, blurring the line between inside and out. Matilda works from a Corian galley island with a 4-burner cooktop, full-size fridge, wine cooler, espresso machine, and a TV on a hidden power lift.</p>
+      <div class="amenities">
+        <div class="am">50" TV on power lift</div><div class="am">Samsung audio system</div>
+        <div class="am">Espresso machine</div><div class="am">Wine cooler</div>
+        <div class="am">4-burner cooktop</div><div class="am">Dishwasher</div>
+        <div class="am">Full-size fridge/freezer</div><div class="am">Three ice makers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cabin-section">
+  <div class="cabin-grid">
+    <div class="cabin-imgs">
+      <img class="main-img" src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure5.jpg?ssl=1" alt="Flybridge" onerror="this.style.opacity='.15'">
+      <div class="thumb-row">
+        <img src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure7.jpg?ssl=1" alt="Sunpads" onerror="this.style.opacity='.15'">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+      </div>
+    </div>
+    <div>
+      <span class="cabin-tag">Flybridge</span>
+      <div class="cabin-title">360° Views<br>Above it All</div>
+      <div class="cabin-sub">Helm · Dining · Sunpads</div>
+      <div class="rule"></div>
+      <p class="body-text">The flybridge is the crown jewel of Solaire — a full-length outdoor deck with the Garmin helm station, dining table for six, curved companion seating, and dedicated sunpads at each corner. The best seat in the house for watching the BVI unfold around you.</p>
+      <div class="amenities">
+        <div class="am">Garmin helm station</div><div class="am">Dining for 6</div>
+        <div class="am">Full sunpads</div><div class="am">Wet bar</div>
+        <div class="am">Gas grill / BBQ</div><div class="am">Ice maker</div>
+        <div class="am">Bimini shade</div><div class="am">360° views</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout-block">
+  <span class="stag">Floor Plan</span>
+  <h2 class="sh">Deck <em>Layout</em></h2>
+  <img class="layout-img" src="https://i0.wp.com/www.centralyachtagent.com/yachtadmin/yachtlg/yacht10301/10301brochure88.jpg?ssl=1" alt="Deck Layout" onerror="this.style.display='none'">
+</div>
+
+<footer style="position:relative;z-index:10"><div class="ft-grid"><div><div class="ft-name"><span class="ft-logo-mark"><span class="sun-logo"></span></span>Solaire</div><div class="ft-tagline">Find Your Sun — With Solaire!</div><p class="ft-desc">A 58-foot crewed power catamaran, built 2026. All-inclusive charter in the British Virgin Islands. 6 guests · 4 cabins · 2 exceptional crew.</p></div><div><div class="ft-head">Pages</div><ul class="ft-ul"><li><a onclick="goPage('home')">Home</a></li><li><a onclick="goPage('cabins')">Cabins</a></li><li><a onclick="goPage('cuisine')">Cuisine</a></li></ul></div><div><div class="ft-head">Onboard</div><ul class="ft-ul"><li><a onclick="goPage('home','crew-teaser')">Crew</a></li><li><a onclick="goPage('home','experience')">Experience</a></li><li><a onclick="goPage('home','destinations')">Destinations</a></li></ul></div><div><div class="ft-head">Booking</div><ul class="ft-ul"><li><a onclick="openBookingForm()" style="cursor:pointer">Inquire Now</a></li><li><a>$42–45k / week</a></li><li><a>5-Night Minimum</a></li><li><a>All Inclusive</a></li></ul></div></div><div class="ft-bot"><span class="ft-copy">© 2026 Solaire Charter. All rights reserved.</span><span class="ft-curr">Marketing by <a href="#" target="_blank">Currnt</a></span></div></footer>
+
+</div><!-- /page-cabins -->
+
+<!-- ═══════════════════════════════════════════════
+     CUISINE PAGE
+═══════════════════════════════════════════════ -->
+<div class="page" id="page-cuisine">
+
+<div class="page-hero">
+  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Food">
+  <div class="page-hero-grad"></div>
+  <div class="page-brand-mark"><span class="sun-logo"></span></div>
+  <div class="page-hero-c">
+    <span class="page-eyebrow">By Chef Matilda Kopra</span>
+    <h1 class="page-title">Cuisine &amp;<br>Cocktails</h1>
+  </div>
+</div>
+
+<div class="chef-intro">
+  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Matilda's cuisine">
+  <div>
+    <span class="stag">The Chef</span>
+    <h2 class="sh">Matilda<br><em>Kopra</em></h2>
+    <div class="rule"></div>
+    <p class="body-text">A private chef with ten years of experience in the food and hospitality industry. Matilda's career has taken her across Europe — from private chalets in the French and Swiss Alps to yachts along the Mediterranean, where she has had the pleasure of cooking for guests in some of the most beautiful settings in the world.</p>
+    <p class="body-text" style="margin-top:16px">Her culinary approach is rooted in creating food that not only tastes great but also makes you feel good — wholesome, health-forward cuisine that's vibrant, balanced, and deeply satisfying. Mediterranean flavors are especially close to her heart. Matilda is happy to cater to any dietary preferences or restrictions, and always tailors every experience with care and attention to detail — making food a highlight of your time away.</p>
+  </div>
+</div>
+
+<div id="breakfast" class="menu-sec">
+  <div class="menu-header">
+    <div>
+      <span class="stag">Morning</span>
+      <h2 class="sh">Break<em>fast</em></h2>
+      <div class="rule"></div>
+      <p class="body-text" style="font-size:.95rem">All breakfasts accompanied by fresh fruit, homemade pastries, coffee, a variety of teas and juices.</p>
+    </div>
+    <img class="menu-header-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Breakfast">
+  </div>
+  <div class="menu-items">
+    <div class="mi"><div class="mi-name">Eggs Benedict</div><div class="mi-desc">potato latke · crispy prosciutto · poached egg · truffle hollandaise</div></div>
+    <div class="mi"><div class="mi-name">Avocado Toast</div><div class="mi-desc">homemade sourdough · avocado · hot honey fried halloumi · fried egg</div></div>
+    <div class="mi"><div class="mi-name">Breakfast Sandwiches</div><div class="mi-desc">fresh baked English muffins · pork sausage patties · cheddar · egg</div></div>
+    <div class="mi"><div class="mi-name">Belgian Waffles</div><div class="mi-desc">homemade summer berry compote · vanilla mascarpone whipped cream</div></div>
+    <div class="mi"><div class="mi-name">Full American Breakfast</div><div class="mi-desc">eggs any style · bacon · avocado · grilled tomato · homemade biscuits</div></div>
+    <div class="mi"><div class="mi-name">Golden Milk Chia Pudding</div><div class="mi-desc">turmeric · ginger · cinnamon · maple syrup · coconut milk · berries · Greek yogurt</div></div>
+    <div class="mi"><div class="mi-name">Quiche Lorraine</div><div class="mi-desc">golden crust · gruyere · smoky pancetta · fresh herbs · radish slivers</div></div>
+    <div class="mi"><div class="mi-name">Crème Brûlée French Toast</div><div class="mi-desc">homemade brioche · espresso mascarpone cream · caramelized sugar coating</div></div>
+  </div>
+</div>
+
+<div id="lunch" class="menu-sec">
+  <div class="menu-header">
+    <div>
+      <span class="stag">Midday</span>
+      <h2 class="sh"><em>Lunch</em></h2>
+      <div class="rule"></div>
+      <p class="body-text" style="font-size:.95rem">All lunches accompanied with a cookie of the day.</p>
+    </div>
+    <img class="menu-header-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Lunch">
+  </div>
+  <div class="menu-items">
+    <div class="mi"><div class="mi-name">Crispy Skinned Salmon</div><div class="mi-desc">brown sugar & soya marinade · black rice · honey beet · cucumber · avocado · spicy tartare</div></div>
+    <div class="mi"><div class="mi-name">Fish Tacos</div><div class="mi-desc">grilled mahi · pineapple & mango salsa · slaw · salsa verde · chili lime Mexican corn</div></div>
+    <div class="mi"><div class="mi-name">Ahi Tuna Poke Bowls</div><div class="mi-desc">fresh tuna · rice · soy & sesame slaw · cucumber · avocado · mango · pickled onion · spicy mayo</div></div>
+    <div class="mi"><div class="mi-name">Chilled Soba Noodle Salad</div><div class="mi-desc">soba noodles · cucumber · carrot · mango · citrus teriyaki chicken · satay sauce · wonton crisps</div></div>
+    <div class="mi"><div class="mi-name">Hot Honey Chicken Sandwich</div><div class="mi-desc">crispy chicken · chili honey · chipotle ranch · coleslaw · freshly baked buttermilk bun</div></div>
+    <div class="mi"><div class="mi-name">Lobster Salad</div><div class="mi-desc">fresh lobster · greens in lemon vinaigrette · avocado · summer potato salad</div></div>
+    <div class="mi"><div class="mi-name">Spring Prawn Risotto</div><div class="mi-desc">garlic & lemon marinated king prawns · sautéed zucchini · basil oil · parmesan crisps</div></div>
+    <div class="mi"><div class="mi-name">House Sushi Platter</div><div class="mi-desc">ahi tuna · atlantic salmon · king prawns or wahoo · edamame · pickled ginger · wasabi</div></div>
+  </div>
+</div>
+
+<div id="dinner" class="menu-sec">
+  <div class="menu-header">
+    <div>
+      <span class="stag">Evening</span>
+      <h2 class="sh"><em>Dinner</em></h2>
+      <div class="rule"></div>
+      <p class="body-text" style="font-size:.95rem">Served with fresh bread and infused butter. Starters and canapés available on request.</p>
+    </div>
+    <img class="menu-header-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Dinner">
+  </div>
+  <span class="submenu-label">Starters</span>
+  <div class="menu-items" style="margin-bottom:48px">
+    <div class="mi"><div class="mi-name">Panzanella Salad</div><div class="mi-desc">heirloom tomatoes · creamy burrata · pink grapefruit · sourdough croutons · mint · olive oil</div></div>
+    <div class="mi"><div class="mi-name">Salmon Crudo</div><div class="mi-desc">pickled jalapeños · crispy lemon zest</div></div>
+    <div class="mi"><div class="mi-name">Mini Crab Cakes</div><div class="mi-desc">zesty mango aioli · cilantro infused olive oil</div></div>
+    <div class="mi"><div class="mi-name">Octopus Carpaccio</div><div class="mi-desc">lemon chimichurri · charred red pepper romesco · microgreens</div></div>
+    <div class="mi"><div class="mi-name">Tuna Tartare</div><div class="mi-desc">avocado · radishes · fresh sourdough bread</div></div>
+    <div class="mi"><div class="mi-name">Prawn Dumplings</div><div class="mi-desc">cilantro coconut broth · crispy onions</div></div>
+  </div>
+  <span class="submenu-label">Main Course</span>
+  <div class="menu-items" style="margin-bottom:48px">
+    <div class="mi"><div class="mi-name">Pistachio Crusted Rack of Lamb</div><div class="mi-desc">cauliflower purée · pomegranate-balsamic jus · parmesan asparagus</div></div>
+    <div class="mi"><div class="mi-name">Seafood Pasta</div><div class="mi-desc">scallops · clams · mussels · pappardelle · buttery white wine sauce</div></div>
+    <div class="mi"><div class="mi-name">Pan Seared Mahi Mahi</div><div class="mi-desc">roasted butternut squash purée · miso-honey sauce · watermelon radish</div></div>
+    <div class="mi"><div class="mi-name">Surf &amp; Turf</div><div class="mi-desc">Angus filet mignon · herb-garlic scallops · bordelaise sauce · roasted new potatoes · broccolini</div></div>
+    <div class="mi"><div class="mi-name">Tamarind Glazed Jerk Chicken</div><div class="mi-desc">slow roasted · creamy coconut polenta · Caribbean pico de gallo</div></div>
+    <div class="mi"><div class="mi-name">Beef Short Ribs Bourguignon</div><div class="mi-desc">roasted seasonal veg · pomme purée</div></div>
+  </div>
+  <span class="submenu-label">Dessert</span>
+  <div class="food-strip">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Dessert">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Plated">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Sweets">
+  </div>
+  <div class="menu-items">
+    <div class="mi"><div class="mi-name">Pistachio Crème Brûlée</div><div class="mi-desc">white chocolate shavings · fresh berries</div></div>
+    <div class="mi"><div class="mi-name">Coconut Mousse</div><div class="mi-desc">nutty crumble · lime compote</div></div>
+    <div class="mi"><div class="mi-name">Key Lime Tart</div><div class="mi-desc">sweet mint · white chocolate cream</div></div>
+    <div class="mi"><div class="mi-name">Classic Cheesecake</div><div class="mi-desc">Biscoff crumb · vanilla whipped cream · blackberry compote</div></div>
+    <div class="mi"><div class="mi-name">Orange &amp; Olive Oil Brownie</div><div class="mi-desc">orange infused mascarpone cream · toasted almond shavings</div></div>
+    <div class="mi"><div class="mi-name">Coconut Panna Cotta</div><div class="mi-desc">rum soaked pineapple · lime</div></div>
+  </div>
+</div>
+
+<div id="cocktails" class="menu-sec">
+  <div class="cocktail-hero">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Cocktails at sunset">
+    <div class="cocktail-hero-inner">
+      <span class="stag">Crafted Onboard</span>
+      <h2 class="sh" style="font-size:clamp(2.8rem,5vw,4.5rem);color:#f5edd8">Cocktail <em>Menu</em></h2>
+    </div>
+  </div>
+  <div class="cocktail-grid">
+    <div class="ci"><div class="ci-name">Sweet Lychee Martini</div><div class="ci-desc">Vodka · lychee syrup · elderflower liqueur · lemon juice</div></div>
+    <div class="ci"><div class="ci-name">Hemingway Daiquiri</div><div class="ci-desc">White rum · maraschino liqueur · fresh lime · fresh grapefruit · simple syrup</div></div>
+    <div class="ci"><div class="ci-name">Mango Mai Tai</div><div class="ci-desc">White rum · aged dark rum · orange liqueur · mango purée · orange syrup · fresh lime</div></div>
+    <div class="ci"><div class="ci-name">Sundown Gin Sour</div><div class="ci-desc">Gin · Aperol · lemon juice · honey syrup</div></div>
+    <div class="ci"><div class="ci-name">Creamy Coconut Margarita</div><div class="ci-desc">Tequila · orange liqueur · fresh lime · agave syrup · cream of coconut</div></div>
+    <div class="ci"><div class="ci-name">Maple Old Fashioned</div><div class="ci-desc">Bourbon · maple syrup · Angostura bitters</div></div>
+    <div class="ci"><div class="ci-name">Tito's Espresso Martini</div><div class="ci-desc">Tito's vodka · Kahlúa · freshly brewed espresso · simple syrup</div></div>
+    <div class="cocktail-note"><div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--teal);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px">All Inclusive</div><div style="font-size:.9rem;color:rgba(11,42,62,.5);line-height:1.8">Standard ship's bar included.<br>Premium spirits on request.</div></div>
+  </div>
+</div>
+
+<footer style="position:relative;z-index:10"><div class="ft-grid"><div><div class="ft-name"><span class="ft-logo-mark"><span class="sun-logo"></span></span>Solaire</div><div class="ft-tagline">Find Your Sun — With Solaire!</div><p class="ft-desc">A 58-foot crewed power catamaran, built 2026. All-inclusive charter in the British Virgin Islands. 6 guests · 4 cabins · 2 exceptional crew.</p></div><div><div class="ft-head">Pages</div><ul class="ft-ul"><li><a onclick="goPage('home')">Home</a></li><li><a onclick="goPage('cabins')">Cabins</a></li><li><a onclick="goPage('cuisine')">Cuisine</a></li></ul></div><div><div class="ft-head">Onboard</div><ul class="ft-ul"><li><a onclick="goPage('home','crew-teaser')">Crew</a></li><li><a onclick="goPage('home','experience')">Experience</a></li><li><a onclick="goPage('home','destinations')">Destinations</a></li></ul></div><div><div class="ft-head">Booking</div><ul class="ft-ul"><li><a onclick="openBookingForm()" style="cursor:pointer">Inquire Now</a></li><li><a>$42–45k / week</a></li><li><a>5-Night Minimum</a></li><li><a>All Inclusive</a></li></ul></div></div><div class="ft-bot"><span class="ft-copy">© 2026 Solaire Charter. All rights reserved.</span><span class="ft-curr">Marketing by <a href="#" target="_blank">Currnt</a></span></div></footer>
+
+</div><!-- /page-cuisine -->
+
+<script>
+/* ═══ THREE.JS OCEAN BACKGROUND ═══ */
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setClearColor(0xf8fdff,1);
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0xf8fdff,20,60);
+  const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,100);
+  camera.position.set(0,3.5,6);camera.lookAt(0,0,0);
+  const vert=`uniform float uTime;uniform float uScroll;varying vec2 vUv;varying float vElev;void main(){vUv=uv;vec4 mp=modelMatrix*vec4(position,1.);float a=mix(.38,.05,uScroll);float e=sin(mp.x*1.1+uTime*.7)*a+sin(mp.z*.8-uTime*.5)*a*.8+sin(mp.x*.45+mp.z*.45-uTime*.35)*a*.6+sin(mp.x*2.2+uTime*1.2)*a*.22;mp.y+=e;vElev=e;gl_Position=projectionMatrix*viewMatrix*mp;}`;
+  const frag=`uniform vec3 uDeep;uniform vec3 uMid;uniform vec3 uShallow;varying float vElev;varying vec2 vUv;void main(){float t=clamp((vElev+.4)/.8,0.,1.);vec3 col=mix(uDeep,uMid,t*.6);col=mix(col,uShallow,pow(t,2.)*.38);float foam=pow(max(0.,(vElev-.26)/.14),3.);col+=vec3(.5,.4,.15)*foam*.28;float dist=length(vUv-.5)*1.6;float vign=1.-smoothstep(.5,1.2,dist);gl_FragColor=vec4(col*vign,mix(.35,.15,clamp(vUv.y,0.,1.)));}`;
+  const mat=new THREE.ShaderMaterial({vertexShader:vert,fragmentShader:frag,uniforms:{uTime:{value:0},uScroll:{value:0},uDeep:{value:new THREE.Color(0x00bcd4)},uMid:{value:new THREE.Color(0x4dd0e1)},uShallow:{value:new THREE.Color(0x80deea)}},transparent:true,side:THREE.DoubleSide});
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(40,40,110,110),mat));
+  const pc=600,pp=new Float32Array(pc*3);
+  for(let i=0;i<pc;i++){pp[i*3]=(Math.random()-.5)*30;pp[i*3+1]=Math.random()*10+.5;pp[i*3+2]=(Math.random()-.5)*30}
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  const pm=new THREE.PointsMaterial({color:0x1a9e96,size:.04,transparent:true,opacity:.45,sizeAttenuation:true});
+  scene.add(new THREE.Points(pg,pm));
+  let t=0,scroll=0,tScroll=0,mx=0,camX=0,camY=3.5;
+  addEventListener('scroll',()=>{tScroll=scrollY/(Math.max(1,document.body.scrollHeight-innerHeight))});
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*.7});
+  (function loop(){requestAnimationFrame(loop);t+=.011;scroll+=(tScroll-scroll)*.04;mat.uniforms.uTime.value=t;mat.uniforms.uScroll.value=scroll;camX+=(mx-camX)*.04;camY+=(3.5+scroll*2.2-camY)*.04;camera.position.set(camX,camY,6-scroll*3.8);camera.lookAt(camX*.3,0,-5);pm.opacity=.3+Math.sin(t*.5)*.1;renderer.render(scene,camera);})();
+  addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+})();
+
+/* ═══ PAGE ROUTER ═══ */
+function goPage(page, anchor){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+page);
+  if(navEl) navEl.classList.add('active');
+  window.scrollTo(0,0);
+  ScrollTrigger.refresh();
+  if(anchor){
+    setTimeout(()=>{
+      const el=document.getElementById(anchor);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    }, 100);
+  }
+  if(page==='home') initHomeAnimations();
+
+function showReview(n){
+  document.querySelectorAll('.rev-slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.rev-dot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('rev'+n).classList.add('active');
+  document.querySelectorAll('.rev-dot')[n].classList.add('active');
+}
+// Auto-rotate reviews
+let curRev=0;
+setInterval(()=>{curRev=(curRev+1)%2;showReview(curRev);},8000);
+
+  if(page==='cabins') initCabinAnimations();
+  if(page==='cuisine') initCuisineAnimations();
+}
+
+/* ═══ GSAP ANIMATIONS ═══ */
+gsap.registerPlugin(ScrollTrigger);
+
+function navScroll(){
+  ScrollTrigger.create({start:'top -80', onUpdate:s=>document.getElementById('nav').classList.toggle('scrolled',s.progress>0)});
+}
+navScroll();
+
+function initHomeAnimations(){
+  ScrollTrigger.getAll().forEach(t=>t.kill());
+  navScroll();
+  gsap.to('#heroImg img',{y:-180,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:2.5}});
+  gsap.fromTo('#siMain',{y:60,opacity:0,x:-40},{y:0,opacity:1,x:0,duration:1.1,ease:'power3.out',scrollTrigger:{trigger:'#story',start:'top 72%',toggleActions:'play none none reverse'}});
+  gsap.fromTo('#siAccent',{y:100,opacity:0,x:40},{y:0,opacity:1,x:0,duration:1.2,delay:.18,ease:'power3.out',scrollTrigger:{trigger:'#story',start:'top 72%',toggleActions:'play none none reverse'}});
+  gsap.to('#siMain',{y:-50,ease:'none',scrollTrigger:{trigger:'#story',start:'top bottom',end:'bottom top',scrub:2}});
+  gsap.to('#siAccent',{y:40,ease:'none',scrollTrigger:{trigger:'#story',start:'top bottom',end:'bottom top',scrub:1.2}});
+  gsap.fromTo('#storyText',{opacity:0,y:44},{opacity:1,y:0,duration:1,delay:.25,ease:'power2.out',scrollTrigger:{trigger:'#story',start:'top 68%',toggleActions:'play none none reverse'}});
+  ['#ec0','#ec1','#ec2','#ec3','#ec4','#ec5'].forEach((sel,i)=>{
+    gsap.fromTo(sel,{clipPath:'inset(100% 0 0 0)',opacity:.7},{clipPath:'inset(0% 0 0 0)',opacity:1,duration:1,delay:i*.1,ease:'power3.out',scrollTrigger:{trigger:'#experience',start:'top 65%',toggleActions:'play none none reverse'}});
+    gsap.fromTo(sel+' img',{scale:1.15},{scale:1.05,duration:1.2,delay:i*.1,ease:'power2.out',scrollTrigger:{trigger:'#experience',start:'top 65%',toggleActions:'play none none reverse'}});
+  });
+  [['#ctLeft',-50,0],['#ctRight',50,.15]].forEach(([id,x,d])=>{
+    gsap.fromTo(id,{scale:1.5,filter:'blur(22px) brightness(.18)',x},{scale:1,filter:'blur(0px) brightness(1)',x:0,duration:1.8,delay:d,ease:'power2.out',scrollTrigger:{trigger:'#crew-teaser',start:'top 72%',toggleActions:'play none none reverse'}});
+  });
+  [['#ctOvL',50,.45],['#ctOvR',50,.6]].forEach(([id,y,d])=>{
+    gsap.fromTo(id,{opacity:0,y},{opacity:1,y:0,duration:1,delay:d,ease:'power2.out',scrollTrigger:{trigger:'#crew-teaser',start:'top 72%',toggleActions:'play none none reverse'}});
+  });
+  ['#dc0','#dc1','#dc2'].forEach((sel,i)=>{
+    gsap.fromTo(sel,{scale:.88,opacity:0,y:30},{scale:1,opacity:1,y:0,duration:.9,delay:i*.12,ease:'power2.out',scrollTrigger:{trigger:'#destinations',start:'top 70%',toggleActions:'play none none reverse'}});
+  });
+  gsap.fromTo('.rev-text',{y:32,opacity:0},{y:0,opacity:1,duration:1.1,scrollTrigger:{trigger:'#review',start:'top 72%',toggleActions:'play none none reverse'}});
+  gsap.fromTo('#ctaImg img',{scale:1.3,filter:'brightness(.12)'},{scale:1.06,filter:'brightness(.28)',ease:'none',scrollTrigger:{trigger:'#cta',start:'top bottom',end:'center center',scrub:2}});
+  gsap.fromTo('#ctaContent',{y:64,opacity:0},{y:0,opacity:1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:'#cta',start:'top 66%',toggleActions:'play none none reverse'}});
+}
+
+function initCabinAnimations(){
+  ScrollTrigger.getAll().forEach(t=>t.kill());
+  navScroll();
+  document.querySelectorAll('#page-cabins .cabin-grid').forEach(g=>{
+    gsap.fromTo(g,{opacity:0,y:50},{opacity:1,y:0,duration:1,ease:'power2.out',scrollTrigger:{trigger:g,start:'top 78%',toggleActions:'play none none reverse'}});
+  });
+}
+
+function initCuisineAnimations(){
+  ScrollTrigger.getAll().forEach(t=>t.kill());
+  navScroll();
+  document.querySelectorAll('#page-cuisine .menu-sec, #page-cuisine .chef-intro').forEach(el=>{
+    gsap.fromTo(el,{opacity:0,y:40},{opacity:1,y:0,duration:1,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 78%',toggleActions:'play none none reverse'}});
+  });
+}
+
+// Init home animations on load
+initHomeAnimations();
+
+function showReview(n){
+  document.querySelectorAll('.rev-slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.rev-dot').forEach(d=>d.classList.remove('active'));
+  document.getElementById('rev'+n).classList.add('active');
+  document.querySelectorAll('.rev-dot')[n].classList.add('active');
+}
+// Auto-rotate reviews
+let curRev=0;
+setInterval(()=>{curRev=(curRev+1)%2;showReview(curRev);},8000);
+
+
+function openBookingForm(){
+  document.getElementById('bookingModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeBookingForm(){
+  document.getElementById('bookingModal').classList.remove('open');
+  document.body.style.overflow='';
+  // Reset form
+  document.getElementById('formFields').style.display='block';
+  document.getElementById('formSuccess').style.display='none';
+  document.getElementById('inquiryForm').reset();
+}
+function submitBooking(e){
+  e.preventDefault();
+  const form=document.getElementById('inquiryForm');
+  const data=new FormData(form);
+  const body=Object.fromEntries(data.entries());
+  // Send via mailto as fallback (works without backend)
+  const subject=encodeURIComponent('Charter Inquiry from '+body.name);
+  const mailBody=encodeURIComponent(
+    'Name: '+body.name+'\n'+
+    'Phone: '+body.phone+'\n'+
+    'Email: '+body.email+'\n'+
+    'Destination: '+body.destination+'\n'+
+    'Dates: '+body.dates+'\n'+
+    'Guests: '+body.guests+'\n'+
+    'Occasion: '+(body.occasion||'N/A')+'\n'+
+    'Notes: '+(body.notes||'N/A')
+  );
+  window.open('mailto:inquiry@solairecharters.com?subject='+subject+'&body='+mailBody,'_blank');
+  document.getElementById('formFields').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
+document.addEventListener('DOMContentLoaded',function(){var m=document.getElementById('bookingModal');if(m)m.addEventListener('click',function(e){if(e.target===this)closeBookingForm();});});
+</script>
+
+<!-- ═══ BOOKING INQUIRY FORM ═══ -->
+<div class="booking-modal" id="bookingModal">
+  <div class="booking-form" id="bookingForm">
+    <button class="bf-close" onclick="closeBookingForm()">&times;</button>
+    <div id="formFields">
+      <h2>Start Your Journey</h2>
+      <p class="bf-sub">Fill out the form below and we'll be in touch to plan your perfect charter.</p>
+      <form id="inquiryForm" onsubmit="submitBooking(event)">
+        <div class="bf-row">
+          <div>
+            <label for="bf-name">Full Name *</label>
+            <input type="text" id="bf-name" name="name" required placeholder="Your name">
+          </div>
+          <div>
+            <label for="bf-phone">Phone *</label>
+            <input type="tel" id="bf-phone" name="phone" required placeholder="+1 (555) 000-0000">
+          </div>
+        </div>
+        <label for="bf-email">Email *</label>
+        <input type="email" id="bf-email" name="email" required placeholder="you@example.com">
+        <label for="bf-dest">Preferred Destination(s) *</label>
+        <select id="bf-dest" name="destination" required>
+          <option value="" disabled selected>Select destination(s)</option>
+          <option value="US & British Virgin Islands">US & British Virgin Islands</option>
+          <option value="Caribbean Leewards">Caribbean Leewards</option>
+          <option value="The Bahamas">The Bahamas</option>
+          <option value="Flexible / Multiple">Flexible / Multiple</option>
+        </select>
+        <label for="bf-dates">Preferred Dates *</label>
+        <input type="text" id="bf-dates" name="dates" required placeholder="e.g. March 15-22, 2026">
+        <div class="bf-row">
+          <div>
+            <label for="bf-guests">Number of Guests *</label>
+            <select id="bf-guests" name="guests" required>
+              <option value="" disabled selected>Select</option>
+              <option value="2">2 Guests</option>
+              <option value="3">3 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="5">5 Guests</option>
+              <option value="6">6 Guests</option>
+            </select>
+          </div>
+          <div>
+            <label for="bf-occasion">Occasion (optional)</label>
+            <input type="text" id="bf-occasion" name="occasion" placeholder="Birthday, anniversary...">
+          </div>
+        </div>
+        <label for="bf-notes">Additional Notes (optional)</label>
+        <textarea id="bf-notes" name="notes" placeholder="Dietary needs, special requests, questions..."></textarea>
+        <button type="submit" class="bf-submit">Send Inquiry</button>
+      </form>
+    </div>
+    <div class="bf-success" id="formSuccess">
+      <h3>Inquiry Sent!</h3>
+      <p>Thank you for your interest in Solaire. Our team will be in touch within 24 hours to begin planning your perfect charter.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
