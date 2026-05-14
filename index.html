@@ -73,7 +73,7 @@ footer{background:var(--sand);padding:70px 64px 44px;border-top:1px solid rgba(2
 .hero-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,17,31,.22) 0%,rgba(7,17,31,.05) 30%,rgba(7,17,31,.1) 55%,rgba(7,17,31,.2) 78%,rgba(7,17,31,.08) 95%,transparent 100%)}
 .hero-c{position:relative;z-index:5;text-align:center;padding:0 20px}
 .hero-eyebrow{font-size:.92rem;letter-spacing:.4em;text-transform:uppercase;color:#ffffff;font-weight:500;margin-bottom:30px;opacity:0;transform:translateY(18px);animation:fuUp .8s .5s ease forwards;text-shadow:0 1px 10px rgba(0,0,0,.25)}
-.title-row{overflow:hidden;line-height:.85}
+.title-row{overflow:visible;white-space:nowrap;line-height:.85}
 .hc{font-family:'Cormorant Garamond',serif;font-size:clamp(7rem,18vw,16rem);font-weight:300;letter-spacing:.06em;color:#ffffff;text-transform:uppercase;display:inline-block;opacity:0;transform:translateY(110px) rotateX(35deg);animation:charUp .9s ease forwards;transform-origin:bottom center;text-shadow:0 2px 24px rgba(7,17,31,.35),0 1px 4px rgba(7,17,31,.4)}
 .hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.35rem,2.6vw,2rem);color:rgba(255,255,255,.9);letter-spacing:.12em;margin-top:24px;opacity:0;animation:fuUp .8s 1.5s ease forwards;text-shadow:0 2px 24px rgba(0,0,0,.9)}
 .hero-stats{display:flex;gap:52px;justify-content:center;margin-top:38px;opacity:0;animation:fuUp .8s 1.8s ease forwards}
@@ -290,6 +290,7 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
 .nav-logo-mark{display:inline-block;width:52px;height:52px;vertical-align:middle;margin-right:10px;transition:transform .4s;position:relative;top:-2px}
 .logo:hover .nav-logo-mark{transform:scale(1.04)}
 @media(max-width:768px){.nav-logo-mark{width:36px;height:36px;margin-right:6px}}
+@media(max-width:768px){.hc{font-size:clamp(3rem,13vw,5rem) !important}.title-row{white-space:nowrap;overflow:visible}.hero-sub{font-size:clamp(1rem,4vw,1.4rem);letter-spacing:.08em}.hero-eyebrow{font-size:.62rem;letter-spacing:.18em}.hero-stats{gap:12px}.hs-num{font-size:1.5rem}}
 /* Footer logo */
 .ft-logo-mark{display:inline-block;width:42px;height:42px;vertical-align:middle;margin-right:12px}
 
