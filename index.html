@@ -313,7 +313,7 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* ═══ MOBILE / TABLET — 900px ═══ */
-@media(max-width:900px){
+@media(max-width:1024px){
   /* Nav */
   nav{padding:16px 24px}
   nav.scrolled{padding:12px 24px}
@@ -322,7 +322,7 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
   .nav-links a{font-size:1.15rem;padding:14px 28px;letter-spacing:.18em}
   .nav-links .dropdown{position:static;opacity:1;pointer-events:all;transform:none;background:rgba(26,158,150,.04);border:none;box-shadow:none;min-width:0;text-align:center;padding:6px 0}
   .nav-links .dropdown a{font-size:.82rem;padding:8px 20px;border-bottom:none;color:rgba(11,42,62,.55)}
-  .nav-book{display:none}
+  .nav-book{display:none !important;visibility:hidden !important}
   .hamburger{display:flex}
   .mobile-book-btn{display:block;margin-top:18px;padding:14px 40px;border:2px solid var(--teal);color:var(--teal);background:transparent;font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;font-weight:500;cursor:pointer;transition:all .3s}
   .mobile-book-btn:hover{background:var(--teal);color:#fff}
@@ -349,6 +349,8 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
   #crew-teaser{padding:80px 20px}
   .ct-inner{grid-template-columns:1fr;gap:4px}
   .ct-half{height:480px;min-height:0}
+  .ct-bio{display:none}
+  .ct-over{padding:28px 24px;background:linear-gradient(to top,rgba(7,17,31,.96) 0%,rgba(7,17,31,.88) 22%,rgba(7,17,31,.0) 42%,transparent 52%)}
 
   /* Destinations */
   #destinations{padding:80px 20px}
