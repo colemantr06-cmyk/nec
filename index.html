@@ -306,6 +306,7 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
 /* CTA brand mark also uses full logo */
 
 /* ═══ HAMBURGER BUTTON ═══ */
+.mobile-book-btn{display:none}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:transparent;border:none;padding:8px;z-index:600;position:relative}
 .hamburger span{width:24px;height:2px;background:var(--teal);display:block;transition:transform .3s,opacity .3s}
 .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -434,6 +435,7 @@ footer .ft-curr{color:rgba(44,62,59,.25)!important}
   <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMenu()">
     <span></span><span></span><span></span>
   </button>
+  <a class="nav-book" onclick="openBookingForm()">Start Your Journey</a>
 </nav>
 
 <!-- ═══════════════════════════════════════════════
