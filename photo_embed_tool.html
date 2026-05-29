@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solaire Photo Embed Tool</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1c2c;color:#e8f0f5;min-height:100vh;padding:40px 20px}
+  h1{font-size:1.6rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:#d4a853}
+  .subtitle{color:rgba(232,240,245,.5);font-size:.9rem;margin-bottom:40px}
+  .step{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:28px;margin-bottom:20px}
+  .step h2{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:#1a9e96;margin-bottom:16px}
+  .file-zone{border:2px dashed rgba(255,255,255,.2);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+  .file-zone:hover,.file-zone.drag{border-color:#1a9e96;background:rgba(26,158,150,.08)}
+  .file-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .file-zone .label{font-size:.9rem;color:rgba(232,240,245,.6)}
+  .file-zone .chosen{font-size:.85rem;color:#1a9e96;margin-top:8px;font-weight:600}
+  .preview{width:100%;max-height:160px;object-fit:cover;border-radius:6px;margin-top:12px;display:none}
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.slots{grid-template-columns:1fr}}
+  .slot-label{font-size:.8rem;color:rgba(232,240,245,.7);margin-bottom:8px;font-weight:600;letter-spacing:.06em}
+  .btn{display:block;width:100%;padding:16px;background:#1a9e96;color:#fff;border:none;border-radius:8px;font-size:.85rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px}
+  .btn:hover{background:#158f88}
+  .btn:disabled{background:rgba(255,255,255,.15);cursor:not-allowed;color:rgba(232,240,245,.4)}
+  .status{margin-top:12px;font-size:.85rem;color:rgba(232,240,245,.6);min-height:20px}
+  .status.ok{color:#1a9e96}
+  .status.err{color:#e05252}
+  .progress{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:12px;overflow:hidden;display:none}
+  .progress-bar{height:100%;background:#1a9e96;width:0;transition:width .3s}
+</style>
+</head>
+<body>
+
+<h1>Solaire · Photo Embed Tool</h1>
+<p class="subtitle">Embed cabin photos directly into index.html — no Imgur, no scripts.</p>
+
+<!-- Step 1: Load index.html -->
+<div class="step">
+  <h2>Step 1 — Load your index.html</h2>
+  <div class="file-zone" id="zone-html">
+    <input type="file" id="input-html" accept=".html">
+    <div class="label">Click or drop <strong>index.html</strong> here</div>
+    <div class="chosen" id="html-name"></div>
+  </div>
+  <div class="status" id="html-status"></div>
+</div>
+
+<!-- Step 2: Pick photos -->
+<div class="step">
+  <h2>Step 2 — Choose photos to embed</h2>
+  <div class="slots">
+    <div>
+      <div class="slot-label">Starboard Aft Cabin (main photo)</div>
+      <div class="file-zone" id="zone-aft">
+        <input type="file" id="input-aft" accept="image/*">
+        <div class="label">Click or drop photo</div>
+        <div class="chosen" id="aft-name"></div>
+        <img class="preview" id="aft-preview">
+      </div>
+    </div>
+    <div>
+      <div class="slot-label">Port Forward Cabin (main photo)</div>
+      <div class="file-zone" id="zone-port">
+        <input type="file" id="input-port" accept="image/*">
+        <div class="label">Click or drop photo</div>
+        <div class="chosen" id="port-name"></div>
+        <img class="preview" id="port-preview">
+      </div>
+    </div>
+    <div>
+      <div class="slot-label">Starboard Forward Cabin (main photo)</div>
+      <div class="file-zone" id="zone-fwd">
+        <input type="file" id="input-fwd" accept="image/*">
+        <div class="label">Click or drop photo</div>
+        <div class="chosen" id="fwd-name"></div>
+        <img class="preview" id="fwd-preview">
+      </div>
+    </div>
+    <div>
+      <div class="slot-label">Flybridge (hero photo)</div>
+      <div class="file-zone" id="zone-fly">
+        <input type="file" id="input-fly" accept="image/*">
+        <div class="label">Click or drop photo</div>
+        <div class="chosen" id="fly-name"></div>
+        <img class="preview" id="fly-preview">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Generate -->
+<div class="step">
+  <h2>Step 3 — Generate &amp; Download</h2>
+  <button class="btn" id="btn-go" disabled>Embed Photos &amp; Download Updated index.html</button>
+  <div class="progress" id="progress"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="status" id="go-status"></div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let htmlText = null;
+
+const slots = {
+  aft:  { sectionId: 'master',    label: 'Starboard Aft Cabin' },
+  port: { sectionId: 'starboard', label: 'Port Forward Cabin' },
+  fwd:  { sectionId: 'port',      label: 'Starboard Forward Cabin' },
+  fly:  { sectionId: null,        label: 'Flybridge' },
+};
+
+const images = { aft: null, port: null, fwd: null, fly: null };
+
+// ── File readers ────────────────────────────────────────────────────────────
+function readHTML(file) {
+  const st = document.getElementById('html-status');
+  st.textContent = 'Reading…';
+  st.className = 'status';
+  const r = new FileReader();
+  r.onload = e => {
+    htmlText = e.target.result;
+    document.getElementById('html-name').textContent = file.name + ' (' + (file.size/1024/1024).toFixed(1) + ' MB)';
+    st.textContent = '✓ Loaded successfully';
+    st.className = 'status ok';
+    checkReady();
+  };
+  r.onerror = () => { st.textContent = 'Error reading file'; st.className = 'status err'; };
+  r.readAsText(file);
+}
+
+function readImage(key, file) {
+  const r = new FileReader();
+  r.onload = e => {
+    images[key] = e.target.result; // data URI
+    document.getElementById(key + '-name').textContent = file.name;
+    const prev = document.getElementById(key + '-preview');
+    prev.src = images[key];
+    prev.style.display = 'block';
+    checkReady();
+  };
+  r.readAsDataURL(file);
+}
+
+// ── Wire up inputs ──────────────────────────────────────────────────────────
+document.getElementById('input-html').addEventListener('change', e => {
+  if (e.target.files[0]) readHTML(e.target.files[0]);
+});
+
+['aft','port','fwd','fly'].forEach(key => {
+  document.getElementById('input-' + key).addEventListener('change', e => {
+    if (e.target.files[0]) readImage(key, e.target.files[0]);
+  });
+});
+
+// ── Drag-over highlight ─────────────────────────────────────────────────────
+document.querySelectorAll('.file-zone').forEach(zone => {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    const inp = zone.querySelector('input[type=file]');
+    if (inp.id === 'input-html') { readHTML(f); }
+    else {
+      const key = inp.id.replace('input-','');
+      readImage(key, f);
+    }
+  });
+});
+
+function checkReady() {
+  const hasAny = Object.values(images).some(v => v !== null);
+  document.getElementById('btn-go').disabled = !(htmlText && hasAny);
+}
+
+// ── Embed logic ─────────────────────────────────────────────────────────────
+function embedMainImg(html, sectionId, dataUri) {
+  const pat = new RegExp(
+    '(<div id="' + sectionId + '"[\\s\\S]*?<div class="cabin-imgs">\\s*<img class="main-img" src=")[^"]*(")',
+    ''
+  );
+  if (pat.test(html)) return html.replace(pat, '$1' + dataUri + '$2');
+  // fallback: no match
+  return null;
+}
+
+function embedFlybridge(html, dataUri) {
+  const pat = /(<span class="cabin-tag">Flybridge<\/span>[\s\S]*?<div class="cabin-imgs">\s*<img class="main-img" src=")[^"]*(")/;
+  if (pat.test(html)) return html.replace(pat, '$1' + dataUri + '$2');
+  return null;
+}
+
+document.getElementById('btn-go').addEventListener('click', () => {
+  const st = document.getElementById('go-status');
+  const prog = document.getElementById('progress');
+  const bar = document.getElementById('progress-bar');
+  st.textContent = 'Processing…'; st.className = 'status';
+  prog.style.display = 'block'; bar.style.width = '10%';
+
+  // Use setTimeout to let UI update before heavy processing
+  setTimeout(() => {
+    let html = htmlText;
+    let count = 0;
+    const errors = [];
+
+    const tasks = [
+      { key: 'aft',  fn: h => embedMainImg(h, 'master',    images.aft) },
+      { key: 'port', fn: h => embedMainImg(h, 'starboard', images.port) },
+      { key: 'fwd',  fn: h => embedMainImg(h, 'port',      images.fwd) },
+      { key: 'fly',  fn: h => embedFlybridge(h,            images.fly) },
+    ];
+
+    tasks.forEach((t, i) => {
+      if (!images[t.key]) return;
+      bar.style.width = (20 + i * 20) + '%';
+      const result = t.fn(html);
+      if (result) { html = result; count++; }
+      else errors.push(slots[t.key].label + ' (pattern not found)');
+    });
+
+    bar.style.width = '90%';
+
+    if (count === 0) {
+      st.textContent = 'No patterns matched. Make sure you loaded the correct index.html.';
+      st.className = 'status err';
+      bar.style.width = '0';
+      return;
+    }
+
+    // Trigger download
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    bar.style.width = '100%';
+    st.className = 'status ok';
+    st.textContent = '✓ Done! Embedded ' + count + ' photo' + (count > 1 ? 's' : '') + '.'
+      + (errors.length ? ' Warnings: ' + errors.join(', ') : '')
+      + ' — index.html downloaded, replace the one in your repo then commit & push.';
+  }, 50);
+});
+</script>
+</body>
+</html>
