@@ -86,6 +86,15 @@
         <img class="preview" id="fly-preview">
       </div>
     </div>
+    <div>
+      <div class="slot-label">Heart of Solaire — Dining Thumbnail ⭐</div>
+      <div class="file-zone" id="zone-dining">
+        <input type="file" id="input-dining" accept="image/*">
+        <div class="label">Click or drop flybridge dining photo</div>
+        <div class="chosen" id="dining-name"></div>
+        <img class="preview" id="dining-preview">
+      </div>
+    </div>
   </div>
 </div>
 
@@ -102,13 +111,14 @@
 let htmlText = null;
 
 const slots = {
-  aft:  { sectionId: 'master',    label: 'Starboard Aft Cabin' },
-  port: { sectionId: 'starboard', label: 'Port Forward Cabin' },
-  fwd:  { sectionId: 'port',      label: 'Starboard Forward Cabin' },
-  fly:  { sectionId: null,        label: 'Flybridge' },
+  aft:    { sectionId: 'master',    label: 'Starboard Aft Cabin' },
+  port:   { sectionId: 'starboard', label: 'Port Forward Cabin' },
+  fwd:    { sectionId: 'port',      label: 'Starboard Forward Cabin' },
+  fly:    { sectionId: null,        label: 'Flybridge' },
+  dining: { sectionId: null,        label: 'Heart of Solaire Dining Thumbnail' },
 };
 
-const images = { aft: null, port: null, fwd: null, fly: null };
+const images = { aft: null, port: null, fwd: null, fly: null, dining: null };
 
 // ── File readers ────────────────────────────────────────────────────────────
 function readHTML(file) {
@@ -145,7 +155,7 @@ document.getElementById('input-html').addEventListener('change', e => {
   if (e.target.files[0]) readHTML(e.target.files[0]);
 });
 
-['aft','port','fwd','fly'].forEach(key => {
+['aft','port','fwd','fly','dining'].forEach(key => {
   document.getElementById('input-' + key).addEventListener('change', e => {
     if (e.target.files[0]) readImage(key, e.target.files[0]);
   });
@@ -191,6 +201,13 @@ function embedFlybridge(html, dataUri) {
   return null;
 }
 
+function embedDiningThumb(html, dataUri) {
+  // Replace the Imgur URL (or any src) on the img with alt="Flybridge dining"
+  const pat = /(<img\b[^>]*alt="Flybridge dining"[^>]*\bsrc=")[^"]*(")|(<img\b[^>]*\bsrc=")[^"]*("[^>]*alt="Flybridge dining")/;
+  if (pat.test(html)) return html.replace(pat, (m, p1, p2, p3, p4) => p1 ? p1+dataUri+p2 : p3+dataUri+p4);
+  return null;
+}
+
 document.getElementById('btn-go').addEventListener('click', () => {
   const st = document.getElementById('go-status');
   const prog = document.getElementById('progress');
@@ -205,10 +222,11 @@ document.getElementById('btn-go').addEventListener('click', () => {
     const errors = [];
 
     const tasks = [
-      { key: 'aft',  fn: h => embedMainImg(h, 'master',    images.aft) },
-      { key: 'port', fn: h => embedMainImg(h, 'starboard', images.port) },
-      { key: 'fwd',  fn: h => embedMainImg(h, 'port',      images.fwd) },
-      { key: 'fly',  fn: h => embedFlybridge(h,            images.fly) },
+      { key: 'aft',    fn: h => embedMainImg(h, 'master',    images.aft) },
+      { key: 'port',   fn: h => embedMainImg(h, 'starboard', images.port) },
+      { key: 'fwd',    fn: h => embedMainImg(h, 'port',      images.fwd) },
+      { key: 'fly',    fn: h => embedFlybridge(h,            images.fly) },
+      { key: 'dining', fn: h => embedDiningThumb(h,          images.dining) },
     ];
 
     tasks.forEach((t, i) => {
